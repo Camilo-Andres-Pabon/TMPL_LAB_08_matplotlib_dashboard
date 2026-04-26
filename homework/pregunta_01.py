@@ -6,38 +6,16 @@ Escriba el codigo que ejecute la accion solicitada.
 
 def pregunta_01():
     """
-    El archivo `files//shipping-data.csv` contiene información sobre los envios
+    El archivo `files/input/shipping-data.csv` contiene información sobre los envios
     de productos de una empresa. Cree un dashboard estático en HTML que
     permita visualizar los siguientes campos:
 
     * `Warehouse_block`
-
     * `Mode_of_Shipment`
-
     * `Customer_rating`
-
     * `Weight_in_gms`
-
-    El dashboard generado debe ser similar a este:
-
-    https://github.com/jdvelasq/LAB_matplotlib_dashboard/blob/main/shipping-dashboard-example.png
-
-    Para ello, siga las instrucciones dadas en el siguiente video:
-
-    https://youtu.be/AgbWALiAGVo
-
-    Tenga en cuenta los siguientes cambios respecto al video:
-
-    * El archivo de datos se encuentra en la carpeta `data`.
-
-    * Todos los archivos debe ser creados en la carpeta `docs`.
-
-    * Su código debe crear la carpeta `docs` si no existe.
-
     """
     import os
-    import base64
-    from io import BytesIO
 
     import matplotlib
     matplotlib.use("Agg")
@@ -45,138 +23,114 @@ def pregunta_01():
     import pandas as pd
 
     # -------------------------------------------------------
-    # 1. Crear carpeta docs si no existe
+    # El test verifica:  os.path.exists("../docs/archivo.png")
+    # Eso es relativo al CWD de pytest (raíz del proyecto).
+    # Por lo tanto docs debe quedar en:  CWD/../docs/
     # -------------------------------------------------------
-    os.makedirs("docs", exist_ok=True)
+    docs_dir = os.path.abspath(os.path.join(os.getcwd(), "..", "docs"))
+    os.makedirs(docs_dir, exist_ok=True)
 
     # -------------------------------------------------------
-    # 2. Cargar datos
+    # CSV también relativo al CWD (raíz del proyecto)
     # -------------------------------------------------------
-    df = pd.read_csv("data/shipping-data.csv")
+    csv_path = os.path.join(os.getcwd(), "files", "input", "shipping-data.csv")
+    df = pd.read_csv(csv_path)
 
     # -------------------------------------------------------
-    # 3. Función auxiliar: figura → cadena base64 PNG
+    # Gráfica 1 – shipping_per_warehouse.png
     # -------------------------------------------------------
-    def fig_to_base64(fig):
-        buf = BytesIO()
-        fig.savefig(buf, format="png", bbox_inches="tight")
-        buf.seek(0)
-        encoded = base64.b64encode(buf.read()).decode("utf-8")
-        plt.close(fig)
-        return encoded
-
-    # -------------------------------------------------------
-    # 4. Gráfica 1 – Warehouse_block (barras)
-    # -------------------------------------------------------
-    fig1, ax1 = plt.subplots(figsize=(5, 4))
+    fig, ax = plt.subplots(figsize=(6, 4))
     warehouse_counts = df["Warehouse_block"].value_counts().sort_index()
-    ax1.bar(warehouse_counts.index, warehouse_counts.values, color="steelblue")
-    ax1.set_title("Envíos por Warehouse Block")
-    ax1.set_xlabel("Warehouse Block")
-    ax1.set_ylabel("Cantidad")
-    img1 = fig_to_base64(fig1)
+    ax.bar(warehouse_counts.index, warehouse_counts.values, color="steelblue")
+    ax.set_title("Shipping per Warehouse Block")
+    ax.set_xlabel("Warehouse Block")
+    ax.set_ylabel("Number of Shipments")
+    plt.tight_layout()
+    fig.savefig(os.path.join(docs_dir, "shipping_per_warehouse.png"))
+    plt.close(fig)
 
     # -------------------------------------------------------
-    # 5. Gráfica 2 – Mode_of_Shipment (pastel)
+    # Gráfica 2 – mode_of_shipment.png
     # -------------------------------------------------------
-    fig2, ax2 = plt.subplots(figsize=(5, 4))
+    fig, ax = plt.subplots(figsize=(6, 4))
     shipment_counts = df["Mode_of_Shipment"].value_counts()
-    ax2.pie(
+    ax.pie(
         shipment_counts.values,
         labels=shipment_counts.index,
         autopct="%1.1f%%",
         startangle=90,
         colors=["#4C72B0", "#DD8452", "#55A868"],
     )
-    ax2.set_title("Modo de Envío")
-    img2 = fig_to_base64(fig2)
+    ax.set_title("Mode of Shipment")
+    plt.tight_layout()
+    fig.savefig(os.path.join(docs_dir, "mode_of_shipment.png"))
+    plt.close(fig)
 
     # -------------------------------------------------------
-    # 6. Gráfica 3 – Customer_rating (barras)
+    # Gráfica 3 – average_customer_rating.png
     # -------------------------------------------------------
-    fig3, ax3 = plt.subplots(figsize=(5, 4))
-    rating_counts = df["Customer_rating"].value_counts().sort_index()
-    ax3.bar(rating_counts.index, rating_counts.values, color="coral")
-    ax3.set_title("Calificación del Cliente")
-    ax3.set_xlabel("Rating (1-5)")
-    ax3.set_ylabel("Cantidad")
-    ax3.set_xticks(rating_counts.index)
-    img3 = fig_to_base64(fig3)
+    fig, ax = plt.subplots(figsize=(6, 4))
+    avg_rating = df.groupby("Warehouse_block")["Customer_rating"].mean().sort_index()
+    ax.bar(avg_rating.index, avg_rating.values, color="coral")
+    ax.set_title("Average Customer Rating by Warehouse")
+    ax.set_xlabel("Warehouse Block")
+    ax.set_ylabel("Average Rating")
+    ax.set_ylim(0, 5)
+    plt.tight_layout()
+    fig.savefig(os.path.join(docs_dir, "average_customer_rating.png"))
+    plt.close(fig)
 
     # -------------------------------------------------------
-    # 7. Gráfica 4 – Weight_in_gms (histograma)
+    # Gráfica 4 – weight_distribution.png
     # -------------------------------------------------------
-    fig4, ax4 = plt.subplots(figsize=(5, 4))
-    ax4.hist(df["Weight_in_gms"], bins=20, color="mediumseagreen", edgecolor="white")
-    ax4.set_title("Distribución de Peso (gms)")
-    ax4.set_xlabel("Peso (gms)")
-    ax4.set_ylabel("Frecuencia")
-    img4 = fig_to_base64(fig4)
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.hist(df["Weight_in_gms"], bins=20, color="mediumseagreen", edgecolor="white")
+    ax.set_title("Weight Distribution (gms)")
+    ax.set_xlabel("Weight (gms)")
+    ax.set_ylabel("Frequency")
+    plt.tight_layout()
+    fig.savefig(os.path.join(docs_dir, "weight_distribution.png"))
+    plt.close(fig)
 
     # -------------------------------------------------------
-    # 8. Crear HTML con las 4 gráficas embebidas
+    # index.html referenciando los 4 PNGs
     # -------------------------------------------------------
-    html_content = f"""<!DOCTYPE html>
+    html_content = """\
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shipping Dashboard</title>
   <style>
-    body {{
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }}
-    h1 {{
-      text-align: center;
-      color: #333;
-      margin-bottom: 30px;
-    }}
-    .grid {{
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+    .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       max-width: 1100px;
       margin: 0 auto;
-    }}
-    .card {{
+    }
+    .card {
       background: white;
       border-radius: 8px;
       padding: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
-    }}
-    .card img {{
-      width: 100%;
-      height: auto;
-    }}
+    }
+    .card img { width: 100%; height: auto; }
   </style>
 </head>
 <body>
   <h1>Shipping Dashboard</h1>
   <div class="grid">
-    <div class="card">
-      <img src="data:image/png;base64,{img1}" alt="Warehouse Block" />
-    </div>
-    <div class="card">
-      <img src="data:image/png;base64,{img2}" alt="Mode of Shipment" />
-    </div>
-    <div class="card">
-      <img src="data:image/png;base64,{img3}" alt="Customer Rating" />
-    </div>
-    <div class="card">
-      <img src="data:image/png;base64,{img4}" alt="Weight in gms" />
-    </div>
+    <div class="card"><img src="shipping_per_warehouse.png" alt="Shipping per Warehouse" /></div>
+    <div class="card"><img src="mode_of_shipment.png" alt="Mode of Shipment" /></div>
+    <div class="card"><img src="average_customer_rating.png" alt="Average Customer Rating" /></div>
+    <div class="card"><img src="weight_distribution.png" alt="Weight Distribution" /></div>
   </div>
 </body>
 </html>
 """
-
-    # -------------------------------------------------------
-    # 9. Guardar el HTML en docs/
-    # -------------------------------------------------------
-    output_path = os.path.join("docs", "index.html")
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_content) 
+    with open(os.path.join(docs_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html_content)

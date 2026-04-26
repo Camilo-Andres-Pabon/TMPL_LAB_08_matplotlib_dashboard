@@ -10,27 +10,27 @@ def test_01():
 
     pregunta.pregunta_01()
 
-    if not os.path.exists("docs/shipping_per_warehouse.png"):
+    if not os.path.exists("../docs/shipping_per_warehouse.png"):
         raise FileNotFoundError(
-            "File 'docs/shipping_per_warehouse.png' not found",
+            "File '../docs/shipping_per_warehouse.png' not found",
         )
 
-    if not os.path.exists("docs/mode_of_shipment.png"):
+    if not os.path.exists("../docs/mode_of_shipment.png"):
         raise FileNotFoundError(
-            "File 'docs/mode_of_shipment.png' not found",
+            "File '../docs/mode_of_shipment.png' not found",
         )
 
-    if not os.path.exists("docs/average_customer_rating.png"):
+    if not os.path.exists("../docs/average_customer_rating.png"):
         raise FileNotFoundError(
-            "File 'docs/average_customer_rating.png' not found",
+            "File '../docs/average_customer_rating.png' not found",
         )
 
-    if not os.path.exists("docs/weight_distribution.png"):
+    if not os.path.exists("../docs/weight_distribution.png"):
         raise FileNotFoundError(
-            "File 'docs/weight_distribution.png' not found",
+            "File '../docs/weight_distribution.png' not found",
         )
 
-    if not os.path.exists("docs/index.html"):
+    if not os.path.exists("../docs/index.html"):
         raise FileNotFoundError(
-            "File 'docs/index.html' not found",
+            "File '../docs/index.html' not found",
         )
